@@ -1,0 +1,1 @@
+# Notifications app for event management system 
