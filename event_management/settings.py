@@ -127,6 +127,12 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 static_dirs = [BASE_DIR / 'static']
 STATICFILES_DIRS = [d for d in static_dirs if d.exists()]
 
+# Ensure static files are collected during deployment
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
