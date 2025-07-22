@@ -46,6 +46,36 @@ def admin_debug(request):
             'message': 'Admin debug failed'
         }, status=500)
 
+def migration_debug(request):
+    """Debug migration status."""
+    try:
+        from django.db import connection
+        from django.core.management import call_command
+        from io import StringIO
+        
+        # Check current migrations
+        out = StringIO()
+        call_command('showmigrations', stdout=out)
+        migrations_output = out.getvalue()
+        
+        # Check database tables
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = [row[0] for row in cursor.fetchall()]
+        
+        return JsonResponse({
+            'status': 'migration_debug',
+            'tables': tables,
+            'migrations': migrations_output.split('\n'),
+            'message': 'Migration debug successful'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'migration_debug_error',
+            'error': str(e),
+            'message': 'Migration debug failed'
+        }, status=500)
+
 def root_redirect(request):
     """Redirect root URL to API documentation."""
     return redirect('/swagger/')
@@ -72,6 +102,7 @@ urlpatterns = [
     path('api/v1/', include('notifications.urls')),
     path('health/', health_check, name='health_check'),
     path('admin-debug/', admin_debug, name='admin_debug'),
+    path('migration-debug/', migration_debug, name='migration_debug'),
     
     # API Documentation
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
