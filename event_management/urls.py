@@ -105,6 +105,83 @@ def run_migrations(request):
             'message': 'Migration run failed'
         }, status=500)
 
+def create_admin_user(request):
+    """Create admin user directly."""
+    try:
+        from django.contrib.auth import get_user_model
+        from django.db import connection
+        
+        User = get_user_model()
+        
+        # First, try to create the users table if it doesn't exist
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users_user (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    password VARCHAR(128) NOT NULL,
+                    last_login DATETIME NULL,
+                    is_superuser BOOLEAN NOT NULL,
+                    username VARCHAR(150) NOT NULL UNIQUE,
+                    first_name VARCHAR(150) NOT NULL,
+                    last_name VARCHAR(150) NOT NULL,
+                    email VARCHAR(254) NOT NULL UNIQUE,
+                    is_staff BOOLEAN NOT NULL,
+                    is_active BOOLEAN NOT NULL,
+                    date_joined DATETIME NOT NULL,
+                    image VARCHAR(100) NULL
+                );
+            """)
+            
+            # Create other necessary tables
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS django_content_type (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    app_label VARCHAR(100) NOT NULL,
+                    model VARCHAR(100) NOT NULL,
+                    UNIQUE(app_label, model)
+                );
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS auth_permission (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name VARCHAR(255) NOT NULL,
+                    content_type_id INTEGER NOT NULL,
+                    codename VARCHAR(100) NOT NULL,
+                    UNIQUE(content_type_id, codename)
+                );
+            """)
+        
+        # Create admin user
+        if not User.objects.filter(email='admin@example.com').exists():
+            admin_user = User.objects.create_user(
+                username='admin',
+                email='admin@example.com',
+                password='admin123',
+                first_name='Admin',
+                last_name='User',
+                is_staff=True,
+                is_superuser=True,
+                is_active=True
+            )
+            message = f"Created admin user: {admin_user.email}"
+        else:
+            admin_user = User.objects.get(email='admin@example.com')
+            message = f"Admin user already exists: {admin_user.email}"
+        
+        return JsonResponse({
+            'status': 'admin_created',
+            'message': message,
+            'user_count': User.objects.count()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'admin_creation_error',
+            'error': str(e),
+            'message': 'Admin creation failed'
+        }, status=500)
+
 def root_redirect(request):
     """Redirect root URL to API documentation."""
     return redirect('/swagger/')
@@ -133,6 +210,7 @@ urlpatterns = [
     path('admin-debug/', admin_debug, name='admin_debug'),
     path('migration-debug/', migration_debug, name='migration_debug'),
     path('run-migrations/', run_migrations, name='run_migrations'),
+    path('create-admin/', create_admin_user, name='create_admin_user'),
     
     # API Documentation
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
