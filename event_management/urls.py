@@ -18,6 +18,34 @@ def health_check(request):
         'message': 'Django Event Management System is running'
     })
 
+def admin_debug(request):
+    """Debug admin functionality."""
+    try:
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth import authenticate
+        User = get_user_model()
+        
+        # Check if admin user exists
+        admin_exists = User.objects.filter(email='admin@example.com').exists()
+        
+        # Try to authenticate
+        user = authenticate(request, email='admin@example.com', password='admin123')
+        auth_success = user is not None
+        
+        return JsonResponse({
+            'status': 'admin_debug',
+            'admin_exists': admin_exists,
+            'auth_success': auth_success,
+            'user_count': User.objects.count(),
+            'message': 'Admin debug successful'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'admin_debug_error',
+            'error': str(e),
+            'message': 'Admin debug failed'
+        }, status=500)
+
 def root_redirect(request):
     """Redirect root URL to API documentation."""
     return redirect('/swagger/')
@@ -43,6 +71,7 @@ urlpatterns = [
     path('api/v1/', include('users.urls')),
     path('api/v1/', include('notifications.urls')),
     path('health/', health_check, name='health_check'),
+    path('admin-debug/', admin_debug, name='admin_debug'),
     
     # API Documentation
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
