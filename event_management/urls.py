@@ -6,6 +6,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -16,6 +17,10 @@ def health_check(request):
         'status': 'healthy',
         'message': 'Django Event Management System is running'
     })
+
+def root_redirect(request):
+    """Redirect root URL to API documentation."""
+    return redirect('/swagger/')
 
 # Swagger/OpenAPI documentation
 schema_view = get_schema_view(
@@ -32,6 +37,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('', root_redirect, name='root_redirect'),
     path('admin/', admin.site.urls),
     path('api/v1/', include('events.urls')),
     path('api/v1/', include('users.urls')),
