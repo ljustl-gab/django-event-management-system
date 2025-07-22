@@ -11,4 +11,5 @@ pytest==7.4.3
 pytest-django==4.7.0
 factory-boy==3.3.0
 coverage==7.3.2
-gunicorn==21.2.0 
+gunicorn==21.2.0
+dj-database-url==2.1.0 
