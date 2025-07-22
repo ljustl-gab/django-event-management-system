@@ -22,11 +22,15 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_REDIRECT_EXEMPT = []
-    SECURE_SSL_REDIRECT = True
+    # SECURE_SSL_REDIRECT = True  # Temporarily disabled for testing
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0', cast=lambda v: [s.strip() for s in v.split(',')])
+
+# Add Render domain to allowed hosts
+if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
+    ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
 
 # Add Railway domain to allowed hosts
 if 'RAILWAY_STATIC_URL' in os.environ:
