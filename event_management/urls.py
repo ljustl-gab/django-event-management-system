@@ -76,6 +76,35 @@ def migration_debug(request):
             'message': 'Migration debug failed'
         }, status=500)
 
+def run_migrations(request):
+    """Manually trigger migrations."""
+    try:
+        from django.core.management import call_command
+        from io import StringIO
+        
+        # Run makemigrations
+        out = StringIO()
+        call_command('makemigrations', stdout=out, stderr=out)
+        makemigrations_output = out.getvalue()
+        
+        # Run migrate
+        out = StringIO()
+        call_command('migrate', stdout=out, stderr=out, verbosity=2)
+        migrate_output = out.getvalue()
+        
+        return JsonResponse({
+            'status': 'migrations_run',
+            'makemigrations': makemigrations_output,
+            'migrate': migrate_output,
+            'message': 'Migrations completed successfully'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'migration_run_error',
+            'error': str(e),
+            'message': 'Migration run failed'
+        }, status=500)
+
 def root_redirect(request):
     """Redirect root URL to API documentation."""
     return redirect('/swagger/')
@@ -103,6 +132,7 @@ urlpatterns = [
     path('health/', health_check, name='health_check'),
     path('admin-debug/', admin_debug, name='admin_debug'),
     path('migration-debug/', migration_debug, name='migration_debug'),
+    path('run-migrations/', run_migrations, name='run_migrations'),
     
     # API Documentation
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),

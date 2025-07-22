@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput --verbosity=2 && python manage.py collectstatic --noinput --clear && python manage.py check --deploy && gunicorn event_management.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --access-logfile - 
+web: python manage.py makemigrations --noinput && python manage.py migrate --noinput --verbosity=2 && python manage.py collectstatic --noinput --clear && python manage.py check --deploy && gunicorn event_management.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --access-logfile - 
