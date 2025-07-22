@@ -33,10 +33,6 @@ python manage.py collectstatic --noinput
 echo "🧪 Testing Django application..."
 python manage.py check
 
-# Create superuser if it doesn't exist
-echo "👤 Creating admin user..."
-python manage.py create_admin
-
 # Start the application
 echo "🌐 Starting Gunicorn server on port $PORT..."
 echo "   Command: gunicorn event_management.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --access-logfile - --error-logfile - --log-level info"
