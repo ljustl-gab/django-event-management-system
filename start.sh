@@ -28,7 +28,7 @@ else:
 
 # Start the application
 echo "🌐 Starting Gunicorn server..."
-exec gunicorn event_management.wsgi:application \
+gunicorn event_management.wsgi:application \
     --bind 0.0.0.0:$PORT \
     --workers 1 \
     --timeout 120 \
