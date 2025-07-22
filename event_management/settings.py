@@ -97,6 +97,13 @@ if 'DATABASE_URL' in os.environ:
     import dj_database_url
     DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'])
 
+# Force SQLite for Render if no DATABASE_URL is set
+if 'RENDER_EXTERNAL_HOSTNAME' in os.environ and 'DATABASE_URL' not in os.environ:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -7,6 +7,7 @@ echo "📊 Environment:"
 echo "   PORT: $PORT"
 echo "   DEBUG: $DEBUG"
 echo "   ALLOWED_HOSTS: $ALLOWED_HOSTS"
+echo "   RENDER_EXTERNAL_HOSTNAME: $RENDER_EXTERNAL_HOSTNAME"
 
 # Create necessary directories
 echo "📁 Creating directories..."
@@ -21,9 +22,14 @@ python --version
 echo "🔧 Testing Django..."
 python -c "import django; print(f'Django version: {django.get_version()}')"
 
-# Run migrations
-echo "📊 Running database migrations..."
-python manage.py migrate --noinput
+# Force database initialization
+echo "🗄️ Initializing database..."
+python manage.py makemigrations --noinput || echo "No new migrations needed"
+python manage.py migrate --noinput --verbosity=2
+
+# Verify database tables exist
+echo "🔍 Verifying database tables..."
+python manage.py dbshell --command=".tables" || echo "Database verification failed"
 
 # Collect static files
 echo "📁 Collecting static files..."
@@ -31,7 +37,7 @@ python manage.py collectstatic --noinput
 
 # Test the application
 echo "🧪 Testing Django application..."
-python manage.py check
+python manage.py check --deploy
 
 # Start the application
 echo "🌐 Starting Gunicorn server on port $PORT..."
