@@ -34,40 +34,8 @@ echo "🧪 Testing Django application..."
 python manage.py check
 
 # Create superuser if it doesn't exist
-echo "👤 Checking for admin user..."
-python manage.py shell -c "
-from django.contrib.auth import get_user_model
-User = get_user_model()
-try:
-    admin_user = User.objects.get(email='admin@example.com')
-    print(f'Admin user already exists: {admin_user.email}')
-except User.DoesNotExist:
-    try:
-        admin_user = User.objects.create_superuser(
-            username='admin',
-            email='admin@example.com',
-            password='admin123',
-            first_name='Admin',
-            last_name='User'
-        )
-        print(f'Admin user created successfully: {admin_user.email}')
-    except Exception as e:
-        print(f'Error creating admin user: {e}')
-        # Try alternative method
-        try:
-            admin_user = User.objects.create_user(
-                username='admin',
-                email='admin@example.com',
-                password='admin123',
-                first_name='Admin',
-                last_name='User',
-                is_staff=True,
-                is_superuser=True
-            )
-            print(f'Admin user created with alternative method: {admin_user.email}')
-        except Exception as e2:
-            print(f'Alternative method also failed: {e2}')
-"
+echo "👤 Creating admin user..."
+python manage.py create_admin
 
 # Start the application
 echo "🌐 Starting Gunicorn server on port $PORT..."
